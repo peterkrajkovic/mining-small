@@ -1,0 +1,225 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 4294967296 bytes for G1 virtual space
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   The process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+#   JVM is running with Zero Based Compressed Oops mode in which the Java heap is
+#     placed in the first 32GB address space. The Java Heap base address is the
+#     maximum limit for the native heap growth. Please use -XX:HeapBaseMinAddress
+#     to set the Java Heap base and to place the Java Heap above 32GB virtual address.
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (os_windows.cpp:3528), pid=16828, tid=11272
+#
+# JRE version:  (20.0.2.1+10) (build )
+# Java VM: OpenJDK 64-Bit Server VM (20.0.2.1+10-FR, mixed mode, tiered, compressed oops, compressed class ptrs, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -ea --patch-module=MiningGIT=build/test/classes --add-modules=MiningGIT --add-reads=MiningGIT=ALL-UNNAMED --add-exports=MiningGIT/tests=ALL-UNNAMED -Xms4g -Xmx24g --module-path=C:\Users\petok\Downloads\mining - small\mining - small\build\classes org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner tests.NewEmptyJUnitTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=false formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,C:\Users\petok\Downloads\mining - small\mining - small\build\test\results\TEST-tests.NewEmptyJUnitTest.xml crashfile=C:\Users\petok\Downloads\mining - small\mining - small\build\junitvmwatcher17559691403120956206.properties propsfile=C:\Users\petok\Downloads\mining - small\mining - small\build\junit16488404962321371288.properties
+
+Host: Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz, 8 cores, 7G,  Windows 11 , 64 bit Build 22621 (10.0.22621.3085)
+Time: Wed Feb 28 10:16:40 2024 Central Europe Standard Time elapsed time: 1.033488 seconds (0d 0h 0m 1s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000001bec2283db0):  JavaThread "Unknown thread" [_thread_in_vm, id=11272, stack(0x000000412e500000,0x000000412e600000)]
+
+Stack: [0x000000412e500000,0x000000412e600000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x6ba11a]
+V  [jvm.dll+0x8968da]
+V  [jvm.dll+0x898665]
+V  [jvm.dll+0x898d53]
+V  [jvm.dll+0x27f9ff]
+V  [jvm.dll+0x6b6f69]
+V  [jvm.dll+0x6abe7a]
+V  [jvm.dll+0x358ce5]
+V  [jvm.dll+0x360e46]
+V  [jvm.dll+0x3b19fe]
+V  [jvm.dll+0x3b1c85]
+V  [jvm.dll+0x329d4a]
+V  [jvm.dll+0x32ab6b]
+V  [jvm.dll+0x86014f]
+V  [jvm.dll+0x3be8d1]
+V  [jvm.dll+0x84bc93]
+V  [jvm.dll+0x44a22f]
+V  [jvm.dll+0x44bcc1]
+C  [jli.dll+0x525c]
+C  [ucrtbase.dll+0x29363]
+C  [KERNEL32.DLL+0x1257d]
+C  [ntdll.dll+0x5aa58]
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x00007ffd1d6ce658, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+
+Other Threads:
+  0x000001bec23131d0 WorkerThread "GC Thread#0" [stack: 0x000000412e600000,0x000000412e700000] [id=7804]
+  0x000001bec2320120 ConcurrentGCThread "G1 Main Marker" [stack: 0x000000412e700000,0x000000412e800000] [id=2416]
+  0x000001bec23209f0 WorkerThread "G1 Conc#0" [stack: 0x000000412e800000,0x000000412e900000] [id=6844]
+
+[error occurred during error reporting (printing all threads), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffd1ce4ca97]
+VM state: not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x000001bec227f580] Heap_lock - owner thread: 0x000001bec2283db0
+
+Heap address: 0x00000001c0000000, size: 24576 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+
+CDS archive(s) not mapped
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0, Narrow klass range: 0x0
+
+GC Precious Log:
+ CardTable entry size: 512
+ Card Set container configuration: InlinePtr #cards 3 size 8 Array Of Cards #cards 128 size 272 Howl #buckets 8 coarsen threshold 29491 Howl Bitmap #cards 4096 size 528 coarsen threshold 3686 Card regions per heap region 1 cards per card region 32768
+
+Heap:
+ garbage-first heap   total 0K, used 0K [0x00000001c0000000, 0x00000007c0000000)
+  region size 16384K, 0 young (0K), 0 survivors (0K)
+
+[error occurred during error reporting (printing heap information), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffd1d222409]
+GC Heap History (0 events):
+No events
+
+Dll operation events (1 events):
+Event: 0.015 Loaded shared library C:\Users\petok\.jdks\corretto-20.0.2.1\bin\java.dll
+
+Deoptimization events (0 events):
+No events
+
+Classes loaded (0 events):
+No events
+
+Classes unloaded (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+VM Operations (0 events):
+No events
+
+Events (0 events):
+No events
+
+
+Dynamic libraries:
+0x00007ff7cb320000 - 0x00007ff7cb32e000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\java.exe
+0x00007ffd9b790000 - 0x00007ffd9b9a7000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffd9aaf0000 - 0x00007ffd9abb4000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffd98bf0000 - 0x00007ffd98f96000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffd98ad0000 - 0x00007ffd98be1000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffd61da0000 - 0x00007ffd61dbb000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\VCRUNTIME140.dll
+0x00007ffd54c40000 - 0x00007ffd54c57000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\jli.dll
+0x00007ffd9ac90000 - 0x00007ffd9ae3e000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffd99360000 - 0x00007ffd99386000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffd9b000000 - 0x00007ffd9b029000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffd99240000 - 0x00007ffd99358000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffd99390000 - 0x00007ffd9942a000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffd7a8a0000 - 0x00007ffd7ab33000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.2506_none_270c5ae97388e100\COMCTL32.dll
+0x00007ffd997f0000 - 0x00007ffd99897000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffd9abc0000 - 0x00007ffd9abf1000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffd91400000 - 0x00007ffd9140c000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\vcruntime140_1.dll
+0x00007ffd47ad0000 - 0x00007ffd47b5e000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\msvcp140.dll
+0x00007ffd1cb10000 - 0x00007ffd1d814000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\server\jvm.dll
+0x00007ffd9aa30000 - 0x00007ffd9aae3000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffd99660000 - 0x00007ffd99708000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffd99430000 - 0x00007ffd99458000 	C:\WINDOWS\System32\bcrypt.dll
+0x00007ffd998a0000 - 0x00007ffd999b7000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffd91420000 - 0x00007ffd91429000 	C:\WINDOWS\SYSTEM32\WSOCK32.dll
+0x00007ffd910e0000 - 0x00007ffd91114000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffd90340000 - 0x00007ffd9034a000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffd9b050000 - 0x00007ffd9b0c1000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffd97bc0000 - 0x00007ffd97bd8000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ffd6b5f0000 - 0x00007ffd6b5fa000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\jimage.dll
+0x00007ffd962c0000 - 0x00007ffd964f3000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffd99e40000 - 0x00007ffd9a1c9000 	C:\WINDOWS\System32\combase.dll
+0x00007ffd99710000 - 0x00007ffd997e7000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffd6ca90000 - 0x00007ffd6cac2000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffd99460000 - 0x00007ffd994da000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffd4c770000 - 0x00007ffd4c796000 	C:\Users\petok\.jdks\corretto-20.0.2.1\bin\java.dll
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Users\petok\.jdks\corretto-20.0.2.1\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.2506_none_270c5ae97388e100;C:\Users\petok\.jdks\corretto-20.0.2.1\bin\server
+
+VM Arguments:
+jvm_args: -ea --patch-module=MiningGIT=build/test/classes --add-modules=MiningGIT --add-reads=MiningGIT=ALL-UNNAMED --add-exports=MiningGIT/tests=ALL-UNNAMED -Xms4g -Xmx24g --module-path=C:\Users\petok\Downloads\mining - small\mining - small\build\classes 
+java_command: org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner tests.NewEmptyJUnitTest skipNonTests=false filtertrace=true haltOnError=false haltOnFailure=false showoutput=true outputtoformatters=true logfailedtests=true threadid=0 logtestlistenerevents=false formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,C:\Users\petok\Downloads\mining - small\mining - small\build\test\results\TEST-tests.NewEmptyJUnitTest.xml crashfile=C:\Users\petok\Downloads\mining - small\mining - small\build\junitvmwatcher17559691403120956206.properties propsfile=C:\Users\petok\Downloads\mining - small\mining - small\build\junit16488404962321371288.properties
+java_class_path (initial): C:\Program Files\NetBeans-21\netbeans\platform\modules\ext\junit-4.13.2.jar;C:\Program Files\NetBeans-21\netbeans\platform\modules\ext\hamcrest-core-1.3.jar;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.2.2\lib\ant\lib\ant-launcher.jar;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.2.2\lib\ant\lib\ant.jar;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.2.2\lib\ant\lib\ant-junit.jar;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2021.2.2\lib\ant\lib\ant-junit4.jar
+Launcher Type: SUN_STANDARD
+
+[Global flags]
+     intx CICompilerCount                          = 4                                         {product} {ergonomic}
+     uint ConcGCThreads                            = 2                                         {product} {ergonomic}
+     uint G1ConcRefinementThreads                  = 8                                         {product} {ergonomic}
+   size_t G1HeapRegionSize                         = 16777216                                  {product} {ergonomic}
+    uintx GCDrainStackTargetSize                   = 64                                        {product} {ergonomic}
+   size_t InitialHeapSize                          = 4294967296                                {product} {command line}
+   size_t MarkStackSize                            = 4194304                                   {product} {ergonomic}
+   size_t MaxHeapSize                              = 25769803776                               {product} {command line}
+   size_t MinHeapDeltaBytes                        = 16777216                                  {product} {ergonomic}
+   size_t MinHeapSize                              = 4294967296                                {product} {command line}
+    uintx NonNMethodCodeHeapSize                   = 5839372                                {pd product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 122909434                              {pd product} {ergonomic}
+    uintx ProfiledCodeHeapSize                     = 122909434                              {pd product} {ergonomic}
+    uintx ReservedCodeCacheSize                    = 251658240                              {pd product} {ergonomic}
+     bool SegmentedCodeCache                       = true                                      {product} {ergonomic}
+   size_t SoftMaxHeapSize                          = 25769803776                            {manageable} {ergonomic}
+     bool UseCompressedClassPointers               = true                           {product lp64_product} {ergonomic}
+     bool UseCompressedOops                        = true                           {product lp64_product} {ergonomic}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags foldmultilines=false
+ #1: stderr all=off uptime,level,tags foldmultilines=false
+
+Environment Variables:
+PATH=C:\Program Files (x86)\Rockwell Software\RSCommon;C:\Program Files\Microsoft\jdk-11.0.16.101-hotspot\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Microsoft SQL Server\150\Tools\Binn\;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\Program Files\PuTTY\;C:\Users\petok\AppData\Local\Microsoft\WindowsApps;C:\OpenSSL-Win32\bin;C:\Users\petok\.dotnet\tools;C:\Users\petok\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\petok\AppData\Local\GitHubDesktop\bin
+USERNAME=petok
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 165 Stepping 2, GenuineIntel
+TMP=C:\Users\petok\AppData\Local\Temp
+TEMP=C:\Users\petok\AppData\Local\Temp
+
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS:
+ Windows 11 , 64 bit Build 22621 (10.0.22621.3085)
+OS uptime: 4 days 17:17 hours
+Hyper-V role detected
+
+CPU: total 8 (initial active 8) (4 cores per cpu, 2 threads per core) family 6 model 165 stepping 2 microcode 0xf0, cx8, cmov, fxsr, ht, mmx, 3dnowpref, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, lzcnt, tsc, tscinvbit, avx, avx2, aes, erms, clmul, bmi1, bmi2, adx, fma, vzeroupper, clflush, clflushopt, hv, rdtscp, f16c
+
+Memory: 4k page, system-wide physical 7968M (593M free)
+TotalPageFile size 18682M (AvailPageFile size 5140M)
+current process WorkingSet (physical memory assigned to process): 12M, peak: 12M
+current process commit charge ("private bytes"): 61M, peak: 4165M
+
+vm_info: OpenJDK 64-Bit Server VM (20.0.2.1+10-FR) for windows-amd64 JRE (20.0.2.1+10-FR), built on 2023-08-19T09:18:31Z by "Administrator" with unknown MS VC++:1937
+
+END.
