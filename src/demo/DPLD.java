@@ -4,13 +4,17 @@
  */
 package demo;
 
+import minig.classification.mdd.MDD;
+import minig.classification.mdd.MDDnode;
+import minig.data.core.attribute.Attribute;
+import projectutils.ProjectUtils;
+import visualization.graphviz.script.GraphvizScript;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import minig.classification.mdd.MDD;
-import minig.classification.mdd.MDDnode;
 
 /**
  *
@@ -23,28 +27,41 @@ public class DPLD {
     private HashMap<Tuple, MDDnode> applyCache;
     
 public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
-    MDD lhsCofactor = COFACTOR(mdd, index, from);
-    MDD rhsCofactor = COFACTOR(mdd, index, to);
-    
+    MDD lhsCofactor = COFACTOR(mdd, index, from - 1);
+    MDD rhsCofactor = COFACTOR(mdd, index, to - 1);
+    String code = GraphvizScript.code(lhsCofactor);
+    ProjectUtils.toClipboard(code);
+
+    code = GraphvizScript.code(rhsCofactor);
+    ProjectUtils.toClipboard(code);
+    if (lhsCofactor == null || rhsCofactor == null){
+        return null;
+    }
+
     Function<Integer, Integer> lowerThanOne = x -> (x < j) ? 1 : 0;
     Function<Integer, Integer> atLeastOne = x -> (x >= j) ? 1 : 0;
     //transformation
-    MDD lhs = TRANSFORM(lhsCofactor, lowerThanOne);
-    MDD rhs = TRANSFORM(rhsCofactor, atLeastOne);
-    
-    MDD result = lhs;//APPLY(lhs, rhs, <Integer, Integer> -> Integer);
-    
+    MDD lhs = transformII(lhsCofactor, lowerThanOne);
+    MDD rhs = transformII(rhsCofactor, atLeastOne);
+    BinaryOperator<Integer> binaryAND = (x, y) -> x.intValue() == 1 && y.intValue() == 1 ? 1 : 0;
+    code = GraphvizScript.code(lhs);
+    ProjectUtils.toClipboard(code);
+
+    code = GraphvizScript.code(rhs);
+    ProjectUtils.toClipboard(code);
+    MDD result = APPLY(lhs, rhs, binaryAND);
+
     return result;
 
 }
     
-    public  MDD COFACTOR(MDD diagram, int i, int a) {
+    public  MDD COFACTOR(MDD diagram, int index, int a) {
         MDDnode root = diagram.getRoot();
 
         if (root.isLeaf()) {
             return diagram;
             
-        } else if (root.getId() == i) {
+        } else if (root.getAsocAttr().getAttributeIndex() == index) {
             
             var sons = root.getChildren();
             if (sons.size() > a) {
@@ -53,7 +70,7 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
             
         } else {
             memo = new HashMap<>();
-            return new MDD(COFACTORSTEP(root, i, a));
+            return new MDD(COFACTORSTEP(root, index, a));
         }
         
         return null;
@@ -70,7 +87,7 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
             return node;
         }
 
-        int index = node.getId();
+        int index = node.getAsocAttr().getAttributeIndex();
         
         // Check if the index of the node is equal to i
         if (index == i) {
@@ -84,7 +101,7 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
         }
 
         // Check if the index of the node is greater than i
-        if (index > i) {
+        if (index < i) {
             return node;
         }
         
@@ -111,7 +128,14 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
 
         return newNode;
     }
-     
+
+    public MDD transformII (MDD diagram, Function<Integer, Integer> gamma) {
+        for(var leaf : diagram.getLeaves()) {
+            leaf.setOutputClass(gamma.apply((int)leaf.getOutputClass()));
+        }
+        MDD d = new MDD(diagram.getRoot());
+        return d;
+    }
     
     public MDD TRANSFORM(MDD diagram, Function<Integer, Integer> gamma) {
         MDDnode root = diagram.getRoot();
@@ -124,7 +148,8 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
 
     public MDDnode TRANSFORMSTEP(MDDnode node, Function<Integer, Integer> gamma) {
         if (node.isLeaf()) {
-            return CreateTerminalNode(node, gamma);
+            int newOutput = gamma.apply((int)node.getOutputClass());
+            return CreateTerminalNode(node.getId(), node.getAsocAttr(), newOutput);
         }
         // Check if the transform of the node has already been computed
         if (memo.containsKey(node)) {
@@ -140,7 +165,7 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
         }
 
         MDDnode newNode = CreateInternalNode(node, newSons);
-        
+        newNode.setAsocAttr(node.getAsocAttr());
         // Memorize the result
         memo.put(node, newNode);
         
@@ -158,53 +183,64 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
         return node;
     }
     
-    public MDDnode CreateTerminalNode(MDDnode oldNode, Function<Integer, Integer> gamma) {
-        
-        int newOutput = gamma.apply((int)oldNode.getOutputClass());
-        
-        for (MDDnode k : terminals){
-            if ((int)k.getOutputClass() == newOutput){
-                return k;
+    public MDDnode CreateTerminalNode(int id, Attribute a, int outputClass) {
+            for (MDDnode k : this.terminals) {
+                if ((int) k.getOutputClass() == outputClass) {
+                    return k;
+                }
             }
-        }
         
         MDDnode node = new MDDnode();
-        node.setId(oldNode.getId());
-        node.setOutputClass(newOutput);
+        node.setId(id);
+        node.setOutputClass(outputClass);
+        node.setAsocAttr(a);
+        terminals.add(node);
         return node;
     }
     
     public MDD APPLY(MDD left, MDD right, BinaryOperator<Integer> op) {
-    MDDnode root = APPLYSTEP(left.getRoot(), right.getRoot(), op);
-    return new MDD(root);
+        applyCache = new HashMap<>();
+        this.terminals = new ArrayList<MDDnode>();
+        MDDnode root = APPLYSTEP(left.getRoot(), right.getRoot(), op);
+        return new MDD(root);
     }
 
     MDDnode APPLYSTEP(MDDnode left, MDDnode right, BinaryOperator<Integer> op) {
         if (applyCache.containsKey(new Tuple(left, right))) {
             return applyCache.get(new Tuple(left, right));
         }
+
         MDDnode node;
         if (left.isLeaf() && right.isLeaf()) {
             node = new MDDnode();
             node.setOutputClass(op.apply((int)left.getOutputClass(),(int)right.getOutputClass()));
             
-        //} else if (ISABSORBINGTTERMINAL(op, left) || ISABSORBINGTTERMINAL(op, right)) {
-           // node = CREATETERMINALNODE(ABSORBINGELEMENT(op));
+        } else if (left.isLeaf() || right.isLeaf()) {
+            node = left.isLeaf() ? CreateTerminalNode(left.getId(), left.getAsocAttr(), (int)left.getOutputClass()) : CreateTerminalNode(right.getId(),right.getAsocAttr(),(int)right.getOutputClass());
             
         } else {
-            int ilhs = left.getChildren().size();
-            int irhs = right.getChildren().size();
-            int i = Math.min(ilhs, irhs);
-            MDDnode[] sons = new MDDnode[i];
-            for (int k = 0; k < i; k++) {
-                if (ilhs < irhs) {
-                    sons[k] = APPLYSTEP(left.getChildren().get(k), right, op);
-                } else {
-                    sons[k] = APPLYSTEP(left, right.getChildren().get(k), op);
+            int ilhs = left.getLevel();
+            int irhs = right.getLevel();
+
+            MDDnode[] sons;
+            if (ilhs > irhs) {
+                var leftChildren = left.getChildren();
+                sons = new MDDnode[leftChildren.size()];
+                for (int k = 0; k < leftChildren.size(); k++) {
+                    sons[k] = APPLYSTEP(leftChildren.get(k), right, op);
                 }
+                node = CreateInternalNode(left, sons);
+                node.setLevel(ilhs);
+            } else {
+                var rightChildren = right.getChildren();
+                sons = new MDDnode[rightChildren.size()];
+                for (int k = 0; k < rightChildren.size(); k++) {
+                    sons[k] = APPLYSTEP(left, rightChildren.get(k), op);
+                }
+                node = CreateInternalNode(right, sons);
+                node.setLevel(irhs);
             }
-            
-            node = CreateInternalNode(new MDDnode(), sons);
+
         }
         applyCache.put(new Tuple(left, right), node);
         return node;
@@ -221,12 +257,11 @@ public MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
         
         @Override
         public boolean equals(Object obj) {
-            if (obj == null || !(obj instanceof Tuple)) {
+            if (!(obj instanceof Tuple other)) {
                 return false;
             }
 
-            Tuple other = (Tuple) obj;
-            return this.x1.equals(other.x1) && this.x2.equals(other.x2);
+            return (this.x1.equals(other.x1) && this.x2.equals(other.x2)) || (this.x2.equals(other.x1) && this.x1.equals(other.x2));
         }
 
         @Override

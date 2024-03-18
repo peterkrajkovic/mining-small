@@ -1,7 +1,7 @@
 package demo;
 
 
-import minig.classification.fdt.*;
+import minig.classification.fdt.FDTu;
 import minig.classification.fdt.FuzzyDecisionTree;
 import minig.classification.mdd.MDD;
 import minig.data.core.dataset.DataSet;
@@ -42,15 +42,21 @@ public class MDDexample {
         //--kod by mal byt ulozeny aj v clipboard (po zbehnuti kodu staci stlacit ctrl+v)
         
         //--vypocet indexov
-        //--test cofactoru
+
         DPLD dpld = new DPLD();
-        //MDD cofactored = dpld.COFACTOR(decisionDiagram, 84, 1);
-        //String code = GraphvizScript.code(cofactored);
-        MDD dl = dpld.IDPLDTYPEIII(decisionDiagram, 83, 0, 1, 1);
-        String code = GraphvizScript.code(dl);
+        String code;
+        //--test algoritmov
+//        MDD cofactored = dpld.COFACTOR(decisionDiagram, 3, 1);
+//        code = GraphvizScript.code(cofactored);
+//        ProjectUtils.toClipboard(code);
+//
+//        Function<Integer, Integer> lowerThanOne = x -> (x < 1) ? 1 : 0;
+//        MDD transformed = dpld.TRANSFORM(cofactored, lowerThanOne);
+//        code = GraphvizScript.code(transformed);
+//        ProjectUtils.toClipboard(code);
+        MDD dl = dpld.IDPLDTYPEIII(decisionDiagram, 3, 1, 2, 1);
+        code = GraphvizScript.code(dl);
         ProjectUtils.toClipboard(code);
-        //System.out.println(cofactored.getLeaves().size());
-        //System.out.println(decisionDiagram.getLeaves().size());
 
         
     }
