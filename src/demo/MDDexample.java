@@ -43,18 +43,10 @@ public class MDDexample {
         
         //--vypocet indexov
 
-        DPLD dpld = new DPLD();
         String code;
-        //--test algoritmov
-//        MDD cofactored = dpld.COFACTOR(decisionDiagram, 3, 1);
-//        code = GraphvizScript.code(cofactored);
-//        ProjectUtils.toClipboard(code);
-//
-//        Function<Integer, Integer> lowerThanOne = x -> (x < 1) ? 1 : 0;
-//        MDD transformed = dpld.TRANSFORM(cofactored, lowerThanOne);
-//        code = GraphvizScript.code(transformed);
-//        ProjectUtils.toClipboard(code);
-        MDD dl = dpld.IDPLDTYPEIII(decisionDiagram, 3, 1, 2, 1);
+        code = GraphvizScript.code(decisionDiagram);
+        ProjectUtils.toClipboard(code);
+        MDD dl = DPLDexamples.DPLD(decisionDiagram, 3, 1, 3);
         code = GraphvizScript.code(dl);
         ProjectUtils.toClipboard(code);
 
