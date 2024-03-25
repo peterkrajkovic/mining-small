@@ -1,7 +1,7 @@
 package demo;
 
 
-import minig.classification.fdt.*;
+import minig.classification.fdt.FDTu;
 import minig.classification.fdt.FuzzyDecisionTree;
 import minig.classification.mdd.MDD;
 import minig.data.core.dataset.DataSet;
@@ -35,14 +35,20 @@ public class MDDexample {
         //fdt.print();
         
         MDD decisionDiagram = new MDD(fdt);
-        String code = GraphvizScript.code(decisionDiagram);
-        ProjectUtils.toClipboard(code);
+        //String code = GraphvizScript.code(decisionDiagram);
+        //ProjectUtils.toClipboard(code);
         //--kod v premennej code je mozne nakopirovat do stranky a diagram sa zobrazi:
         //                https://dreampuf.github.io/GraphvizOnline/
         //--kod by mal byt ulozeny aj v clipboard (po zbehnuti kodu staci stlacit ctrl+v)
         
         //--vypocet indexov
-        
+
+        String code;
+        code = GraphvizScript.code(decisionDiagram);
+        ProjectUtils.toClipboard(code);
+        MDD dl = DPLDexamples.DPLD(decisionDiagram, 3, 1, 3);
+        code = GraphvizScript.code(dl);
+        ProjectUtils.toClipboard(code);
 
         
     }

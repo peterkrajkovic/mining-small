@@ -5,16 +5,6 @@
  */
 package minig.classification.mdd;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
 import minig.classification.fdt.FDTu;
 import minig.classification.fdt.FuzzyDecisionTree;
 import minig.classification.trees.ClassificationTree;
@@ -26,6 +16,9 @@ import minig.data.core.dataset.UCIdatasetFactory.DatasetFactory;
 import projectutils.ConsolePrintable;
 import projectutils.ProjectUtils;
 import visualization.graphviz.script.GraphvizScript;
+
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  *
@@ -43,19 +36,21 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable {
     
      public MDD(MDDnode root) {
         this.root = root;
-        findLeaves(root);
+        findLeaves(root,0);
     }
 
 
     // Helper method to find all leaves in the MDD
-    private void findLeaves(MDDnode node) {
+    private void findLeaves(MDDnode node, int level) {
+        node.setLevel(level);
         if (node.isLeaf()) {
             if (!leaves.contains(node)){
                 leaves.add(node);
             }
         } else {
+
             for (MDDnode child : node.getChildren()) {
-                findLeaves(child);
+                findLeaves(child, level + 1);
             }
         }
     }
@@ -107,7 +102,7 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable {
     }
 
     // region reduce inak
-    private void reduceInak() {
+    public void reduceInak() {
         final var reducer = new Reducer();
         final var newRoot = reducer.reduce(this.root);
         this.root = newRoot;
