@@ -16,6 +16,7 @@ import minig.data.core.attribute.NumericAttr;
 import minig.data.core.dataset.UCIdatasetFactory.DatasetFactory;
 import projectutils.ConsolePrintable;
 import projectutils.ProjectUtils;
+import projectutils.structures.DoubleVector;
 
 /**
  *
@@ -75,7 +76,7 @@ public class NewInstance extends Instance implements ConsolePrintable {
     public int getClassIndex() {
         int i = dataset.getOutbputAttribute().getAttributeIndex();
         if (dataset.getOutbputAttribute().isFuzzy()) {
-             Object obj = values.get(i);
+            Object obj = values.get(i);
             List<Double> values = (List<Double>) obj;
             return ProjectUtils.getMaxValueIndex(values);
         } else if (dataset.getOutbputAttribute().isLinguistic()) {
@@ -205,10 +206,10 @@ public class NewInstance extends Instance implements ConsolePrintable {
 
     public static void main(String[] args) {
         DataSet dt = DatasetFactory.getDataset(DatasetFactory.IRIS);
-       // dt.toFuzzyDataset(0);
+        // dt.toFuzzyDataset(0);
         dt.getInstance(0).getValues();
-    //    dt = dt.getFuzzyDataset();
-    //    dt.getFuzzyDataset();
+        //    dt = dt.getFuzzyDataset();
+        //    dt.getFuzzyDataset();
         NewInstance i = dt.getInstance(0);
         i.getClassIndex();
         System.out.println(i.toInstanceString());
@@ -249,6 +250,12 @@ public class NewInstance extends Instance implements ConsolePrintable {
     @Override
     public void setValue(LinguisticAttr attr, int classIndex) {
         values.set(attr.getAttributeIndex(), attr.getAttrValue(classIndex).getName());
+    }
+
+    public void setValue(FuzzyAttr attr, int classIndex) {
+        DoubleVector dv = DoubleVector.zeros(attr.getDomainSize());
+        dv.setNum(classIndex, 1d);
+        values.set(attr.getAttributeIndex(), dv);
     }
 
     public void setValue(int attrIndex, double value) {
