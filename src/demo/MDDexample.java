@@ -46,11 +46,14 @@ public class MDDexample {
         String code;
         code = GraphvizScript.code(decisionDiagram);
         ProjectUtils.toClipboard(code);
-        MDD dl = DPLDexamples.DPLD(decisionDiagram, 3, 1, 3);
+        MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
         code = GraphvizScript.code(dl);
         ProjectUtils.toClipboard(code);
+        var SItable = DPLDexamples.SICalculation(decisionDiagram);
 
-        
+        for (int key : SItable.keySet()) {
+            System.out.println("index: " + key + ", structural index: " + SItable.get(key));
+        }
     }
     
     

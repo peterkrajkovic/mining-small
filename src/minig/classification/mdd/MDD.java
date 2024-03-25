@@ -102,13 +102,13 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable {
     }
 
     // region reduce inak
-    public void reduceInak() {
+    private void reduceInak() {
         final var reducer = new Reducer();
         final var newRoot = reducer.reduce(this.root);
         this.root = newRoot;
     }
 
-    private static class InternalNodeKey {
+    public static class InternalNodeKey {
 
         private final int index;
         private final int[] sons;

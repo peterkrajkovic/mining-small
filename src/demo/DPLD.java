@@ -53,8 +53,8 @@ public class DPLD {
     public MDD UniversalDPLD(MDD mdd, int index, int from, int to, BinaryOperator<Integer> applyFunction) {
 
         //cofactor computation
-        MDD lhsCofactor = COFACTOR(mdd, index, from - 1);
-        MDD rhsCofactor = COFACTOR(mdd, index, to - 1);
+        MDD lhsCofactor = COFACTOR(mdd, index, from);
+        MDD rhsCofactor = COFACTOR(mdd, index, to);
         String code;
         code = GraphvizScript.code(lhsCofactor);
         ProjectUtils.toClipboard(code);
