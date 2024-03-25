@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  *
  * @author rabcan
  */
-public class MDD extends Tree<MDDnode> implements ConsolePrintable {
+public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
 
     private MDDnode root;
     private List<MDDnode> leaves = new ArrayList<>();
@@ -38,6 +38,40 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable {
         this.root = root;
         findLeaves(root,0);
     }
+	
+	
+    @Override
+    public List<Double> classify(Instance instance) {
+        MDDnode n = getRoot();
+        int pathIndex = 0;
+        while (!n.isLeaf()) {
+            CategoricalAttr asoc = n.getAsocAttr().categorical();
+            if (asoc.isCategorical()) {
+                pathIndex = instance.getClassIndex(asoc);
+            }
+            n = n.getChildren().get(pathIndex);
+        }
+        int domainSize = instance.getDataset().getOutbputAttribute().getDomainSize();
+        DoubleVector dv = DoubleVector.zeros(domainSize);
+        dv.setNum((int) n.getOutputClass(), 1);
+        return dv;
+    }
+
+    @Override
+    public <T extends DataSet> T getDataset() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void setDataset(DataSet dt) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void buildModel() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 
 
     // Helper method to find all leaves in the MDD
