@@ -43,7 +43,18 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
         findLeaves(root,0);
     }
 	
-	
+	public void setLogicalLevels() {
+        setLogicalLevelsStep(this.root, 0);
+    }
+    private void setLogicalLevelsStep(MDDnode node, int level) {
+        if (node.getLogicalLevel() < level) {
+            node.setLogicalLevel(level);
+        }
+        for (MDDnode child : node.getChildren()) {
+                setLogicalLevelsStep(child, level + 1);
+        }
+    }
+
     @Override
     public List<Double> classify(Instance instance) {
         MDDnode n = getRoot();
@@ -80,10 +91,17 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
 
     // Helper method to find all leaves in the MDD
     private void findLeaves(MDDnode node, int level) {
-        node.setLevel(level);
+        if (node.getLevel() < level) {
+            node.setLevel(level);
+        }
         if (node.isLeaf()) {
             if (!leaves.contains(node)){
                 leaves.add(node);
+            } else {
+                int index = leaves.indexOf(node);
+                if (leaves.get(index).getLevel() < level) {
+                    leaves.get(index).setLevel(level);
+                }
             }
         } else {
 

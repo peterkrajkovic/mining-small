@@ -5,11 +5,12 @@
  */
 package minig.classification.mdd;
 
-import java.util.ArrayList;
-import java.util.List;
 import minig.classification.trees.ClassificationTreeNode;
 import minig.data.core.attribute.Attribute;
 import projectutils.Sequencer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -17,6 +18,7 @@ import projectutils.Sequencer;
  */
 public class MDDnode implements ClassificationTreeNode {
 
+    private Variable variable = new Variable();
     private Attribute asocAttr;
     private int outputClass;
     private ArrayList<MDDnode> children = new ArrayList<>();
@@ -74,7 +76,14 @@ public class MDDnode implements ClassificationTreeNode {
     public void setOutputClass(int outputClass) {
         this.outputClass = outputClass;
     }
-    
+
+    public void setLogicalLevel(int logicalLevel){
+        variable.logicalLevel = logicalLevel;
+    }
+
+    public int getLogicalLevel() {
+        return this.variable.logicalLevel;
+    }
 
     public void setLevel(int level) {
         this.level = level;
@@ -97,6 +106,12 @@ public class MDDnode implements ClassificationTreeNode {
      */
     public double getFrequence() {
         return 1;
+    }
+
+    public static class Variable {
+
+        Attribute asocAttr;
+        int logicalLevel;
     }
 
 }

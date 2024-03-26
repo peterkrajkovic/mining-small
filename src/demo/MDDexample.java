@@ -36,20 +36,19 @@ public class MDDexample {
         //fdt.print();
         
         MDD decisionDiagram = new MDD(fdt);
-        //String code = GraphvizScript.code(decisionDiagram);
-        //ProjectUtils.toClipboard(code);
+        String code = GraphvizScript.code(decisionDiagram);
+        ProjectUtils.toClipboard(code);
         //--kod v premennej code je mozne nakopirovat do stranky a diagram sa zobrazi:
         //                https://dreampuf.github.io/GraphvizOnline/
         //--kod by mal byt ulozeny aj v clipboard (po zbehnuti kodu staci stlacit ctrl+v)
         
         //--vypocet indexov
-
-        String code;
+        decisionDiagram.setLogicalLevels();
         code = GraphvizScript.code(decisionDiagram);
         ProjectUtils.toClipboard(code);
-        //MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
-        //code = GraphvizScript.code(dl);
-        //ProjectUtils.toClipboard(code);
+        MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
+        code = GraphvizScript.code(dl);
+        ProjectUtils.toClipboard(code);
         System.out.println("vypocet pomocou tabulky");
         var SItable = DPLDexamples.SICalculation(decisionDiagram);
         StructFunctionClassifier cls = new StructFunctionClassifier(decisionDiagram, fdt.getDataset());

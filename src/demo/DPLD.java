@@ -134,7 +134,7 @@ public class DPLD {
         }
         newNode.setId(node.getId());
         newNode.setAsocAttr(node.getAsocAttr());
-
+        newNode.setLogicalLevel(node.getLogicalLevel());
         // Memorize the result
         memo.put(node, newNode);
 
@@ -193,7 +193,7 @@ public class DPLD {
         }
         node.setId(oldNode.getId());
         node.setAsocAttr(oldNode.getAsocAttr());
-
+        node.setLogicalLevel(oldNode.getLogicalLevel());
         return node;
     }
 
@@ -237,7 +237,6 @@ public class DPLD {
                 sons[k] = APPLYSTEP(leftChildren.get(k), right, op);
             }
             node = CreateInternalNode(left, sons);
-            node.setLevel(left.getLevel());
 
         } else if (left.isLeaf()) {
             var rightChildren = right.getChildren();
@@ -246,10 +245,9 @@ public class DPLD {
                 sons[k] = APPLYSTEP(left, rightChildren.get(k), op);
             }
             node = CreateInternalNode(right, sons);
-            node.setLevel(right.getLevel());
         } else {
-            int ilhs = left.getAsocAttr().getAttributeIndex();
-            int irhs = right.getAsocAttr().getAttributeIndex();
+            int ilhs = left.getLevel();
+            int irhs = right.getLevel();
 
             MDDnode[] sons;
             if (ilhs > irhs) {
@@ -259,8 +257,7 @@ public class DPLD {
                     sons[k] = APPLYSTEP(leftChildren.get(k), right, op);
                 }
                 node = CreateInternalNode(left, sons);
-                node.setLevel(ilhs);
-            } else if (ilhs == irhs) {
+            } else if (ilhs == irhs && left.getChildren().size() == right.getChildren().size()) {
                 var rightChildren = right.getChildren();
                 var leftChildren = left.getChildren();
                 sons = new MDDnode[rightChildren.size()];
@@ -268,7 +265,6 @@ public class DPLD {
                     sons[k] = APPLYSTEP(leftChildren.get(k), rightChildren.get(k), op);
                 }
                 node = CreateInternalNode(right, sons);
-                node.setLevel(irhs);
             } else {
                 var rightChildren = right.getChildren();
                 sons = new MDDnode[rightChildren.size()];
@@ -276,7 +272,6 @@ public class DPLD {
                     sons[k] = APPLYSTEP(left, rightChildren.get(k), op);
                 }
                 node = CreateInternalNode(right, sons);
-                node.setLevel(irhs);
             }
 
         }
