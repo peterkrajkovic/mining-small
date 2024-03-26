@@ -2,6 +2,8 @@ package demo;
 
 import minig.classification.mdd.MDD;
 import minig.classification.mdd.MDDnode;
+import projectutils.ProjectUtils;
+import visualization.graphviz.script.GraphvizScript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,8 +61,26 @@ public class DPLDexamples {
 
     public static HashMap<Integer, Double> SICalculation(MDD mdd) {
         ArrayList<Integer> ids = new ArrayList<Integer>();
+        HashMap<Integer,Integer> decisions = new HashMap<Integer, Integer>();
+        HashMap<Integer,Integer> decisionWeights = new HashMap<Integer, Integer>();
         HashMap<Integer, Integer> si = new HashMap<>();
         int allCombinations = 1;
+        for (MDDnode node : mdd) {
+            if (node.getAsocAttr() != null) {
+                int index = node.getAsocAttr().getAttributeIndex();
+                if (!ids.contains(index)) {
+                    ids.add(index);
+                    int dec = node.getAsocAttr().getDomainSize();
+                    allCombinations = allCombinations * dec;
+                    decisions.put(index, dec);
+                }
+            }
+        }
+        decisionWeights.put(0,1);
+        for (int i = 1; i < decisions.size(); i++) {
+            decisionWeights.put(i, decisionWeights.get(i - 1) * decisions.get(i - 1));
+        }
+        ids = new ArrayList<>();
 
         for (MDDnode node : mdd) {
             if (node.getAsocAttr() != null) {
@@ -69,38 +89,51 @@ public class DPLDexamples {
 
                 if (!ids.contains(index)) {
                     ids.add(index);
-                    int decisions = node.getAsocAttr().getDomainSize();
-                    allCombinations = allCombinations * decisions;
-
-                    for (int i = 0; i < decisions - 1; i++) {
-                        for (int j = i + 1; j < decisions; j++) {
-                            MDD dpld = DPLD(mdd, index, i , j);
-                            changes += getChanges(dpld);
+                    int size = node.getAsocAttr().getDomainSize();
+                    HashMap<Integer,Integer> newDecisionWeights = new HashMap<>();
+                    newDecisionWeights.put(0,1);
+                    for (int k = 1; k < decisionWeights.size(); k++) {
+                        if (index <= k) {
+                            if (k == 1) {
+                                newDecisionWeights.put(1,1);
+                            } else {
+                                newDecisionWeights.put(k, newDecisionWeights.get(k - 2) * decisions.get(k - 2));
+                            }
+                        } else {
+                            newDecisionWeights.put(k, newDecisionWeights.get(k - 1) * decisions.get(k - 1));
                         }
                     }
+
+                    for (int i = 0; i < size; i++) {
+                        for (int j = i + 1; j < size; j++) {
+                            MDD dpld = DPLD(mdd, index, i , j);
+                            String code;
+                            code = GraphvizScript.code(dpld);
+                            ProjectUtils.toClipboard(code);
+                            changes += getChanges(dpld, newDecisionWeights);
+                        }
+                    }
+                    si.put(index, changes);
                 }
-                si.put(index, changes);
+
             }
         }
-        for (int key : si.keySet()) {
-            System.out.println("index: " + key + ", changes: " + si.get(key));
-        }
-        System.out.println("all combinations: " + allCombinations);
+
         HashMap <Integer, Double> updatedSI = new HashMap<Integer, Double>();
         for (int key : si.keySet()) {
-            double value = si.get(key) / (double)allCombinations;
+            double value = si.get(key) / ((double)allCombinations / decisions.get(key));
             updatedSI.put(key, value);
         }
         return updatedSI;
     }
 
-    private static int getChanges(MDD dpld) {
+    private static int getChanges(MDD dpld, HashMap<Integer, Integer> decisionWeight) {
         int changes = 0;
         for (MDDnode node : dpld) {
             if (node.getAsocAttr() != null) {
                 for (MDDnode child : node.getChildren()) {
                     if (child.isLeaf() && child.getOutputClass() == 0) {
-                        changes++;
+                        changes += decisionWeight.get(node.getAsocAttr().getAttributeIndex());
                     }
                 }
             }

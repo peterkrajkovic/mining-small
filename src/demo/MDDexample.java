@@ -7,6 +7,7 @@ import minig.classification.mdd.MDD;
 import minig.data.core.dataset.DataSet;
 import minig.data.core.dataset.UCIdatasetFactory.DatasetFactory;
 import projectutils.ProjectUtils;
+import reliability.StructFunctionClassifier;
 import visualization.graphviz.script.GraphvizScript;
 
 /*
@@ -46,11 +47,15 @@ public class MDDexample {
         String code;
         code = GraphvizScript.code(decisionDiagram);
         ProjectUtils.toClipboard(code);
-        MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
-        code = GraphvizScript.code(dl);
-        ProjectUtils.toClipboard(code);
+        //MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
+        //code = GraphvizScript.code(dl);
+        //ProjectUtils.toClipboard(code);
+        System.out.println("vypocet pomocou tabulky");
         var SItable = DPLDexamples.SICalculation(decisionDiagram);
-
+        StructFunctionClassifier cls = new StructFunctionClassifier(decisionDiagram, fdt.getDataset());
+        cls.printImportance();
+        //System.out.println(cls.derivate(3, 0, 1));
+        System.out.println("vypocet pomocou MDD");
         for (int key : SItable.keySet()) {
             System.out.println("index: " + key + ", structural index: " + SItable.get(key));
         }

@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package demo;
-
 import minig.classification.mdd.MDD;
 import minig.classification.mdd.MDDnode;
 import minig.data.core.attribute.Attribute;
@@ -15,7 +14,6 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-
 /**
  * @author petok
  */
@@ -63,7 +61,6 @@ public class DPLD {
         if (lhsCofactor == null || rhsCofactor == null) {
             return null;
         }
-
         //diagrams combination
         MDD result = APPLY(lhsCofactor, rhsCofactor, applyFunction);
         return result;
@@ -287,11 +284,11 @@ public class DPLD {
         return node;
     }
 
-    public class Tuple {
-        final MDDnode x1;
-        final MDDnode x2;
+    public static class Tuple<T> {
+        T x1;
+        T x2;
 
-        Tuple(MDDnode x1, MDDnode x2) {
+        Tuple(T x1, T x2) {
             this.x1 = x1;
             this.x2 = x2;
         }

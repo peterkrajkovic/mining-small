@@ -11,10 +11,14 @@ import minig.classification.trees.ClassificationTree;
 import minig.classification.trees.ClassificationTreeNode;
 import minig.classification.trees.Tree;
 import minig.classification.trees.TreeNode;
+import minig.data.core.attribute.CategoricalAttr;
 import minig.data.core.dataset.DataSet;
+import minig.data.core.dataset.Instance;
 import minig.data.core.dataset.UCIdatasetFactory.DatasetFactory;
+import minig.models.Classifier;
 import projectutils.ConsolePrintable;
 import projectutils.ProjectUtils;
+import projectutils.structures.DoubleVector;
 import visualization.graphviz.script.GraphvizScript;
 
 import java.util.*;
@@ -146,10 +150,9 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
 
         private final int index;
         private final int[] sons;
-
-        public InternalNodeKey(int index, int[] sons) {
+        public InternalNodeKey(int index, int[] sonsIndexes) {
             this.index = index;
-            this.sons = sons;
+            sons = sonsIndexes;
         }
 
         @Override
