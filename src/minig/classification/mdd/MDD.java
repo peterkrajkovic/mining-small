@@ -34,6 +34,7 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
     private List<MDDnode> leaves = new ArrayList<>();
     private int classCount;
     private int variableCount = 0;
+    private HashMap<Integer, String> logicalIndexAttributes;
 
     public MDD() {
     }
@@ -43,12 +44,17 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
         findLeaves(root,0);
     }
 	
-	public void setLogicalLevels() {
+	public HashMap<Integer, String> setLogicalLevels() {
+        logicalIndexAttributes = new HashMap<>();
         setLogicalLevelsStep(this.root, 0);
+        return logicalIndexAttributes;
     }
     private void setLogicalLevelsStep(MDDnode node, int level) {
-        if (node.getLogicalLevel() < level) {
+        if (node.getLogicalLevel() <= level) {
             node.setLogicalLevel(level);
+            if (!logicalIndexAttributes.containsKey(level) && !node.isLeaf()) {
+                logicalIndexAttributes.put(level, node.getAsocAttr().getName());
+            }
         }
         for (MDDnode child : node.getChildren()) {
                 setLogicalLevelsStep(child, level + 1);

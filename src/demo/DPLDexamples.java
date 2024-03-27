@@ -2,8 +2,6 @@ package demo;
 
 import minig.classification.mdd.MDD;
 import minig.classification.mdd.MDDnode;
-import projectutils.ProjectUtils;
-import visualization.graphviz.script.GraphvizScript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,10 +105,11 @@ public class DPLDexamples {
                     for (int i = 0; i < size; i++) {
                         for (int j = i + 1; j < size; j++) {
                             MDD dpld = DPLD(mdd, index, i , j);
-                            String code;
-                            code = GraphvizScript.code(dpld);
-                            ProjectUtils.toClipboard(code);
+                            //String code;
+                            //code = GraphvizScript.code(dpld);
+                            //ProjectUtils.toClipboard(code);
                             int newChanges = getChanges(dpld, newDecisionWeights);
+                            //System.out.println(logicalLevel + ", from: " + i + " to:" + j + " changes: " + newChanges);
                             changes += newChanges;
                         }
                     }
@@ -122,10 +121,57 @@ public class DPLDexamples {
 
         HashMap <Integer, Double> updatedSI = new HashMap<Integer, Double>();
         for (int key : si.keySet()) {
+            //System.out.println("key: " + key + " all: "+ allCombinations + " decisions: " + decisions.get(key));
             double value = si.get(key) / ((double)allCombinations / decisions.get(key));
             updatedSI.put(key, value);
         }
         return updatedSI;
+    }
+
+    public static double derivate(MDD diagram, int componentIndex, int stateFrom, int stateTo) {
+        ArrayList<Integer> ids = new ArrayList<Integer>();
+        HashMap<Integer,Integer> decisions = new HashMap<Integer, Integer>();
+        HashMap<Integer,Integer> decisionWeights = new HashMap<Integer, Integer>();
+        int indexDomainSize = 0;
+        int indexLogicalLevel = 0;
+        int allCombinations = 1;
+        for (MDDnode node : diagram) {
+            if (node.getAsocAttr() != null) {
+                int index = node.getLogicalLevel();
+                if (!ids.contains(index)) {
+                    if (node.getAsocAttr().getAttributeIndex() == componentIndex) {
+                        indexLogicalLevel = index;
+                        indexDomainSize = node.getAsocAttr().getDomainSize();
+                    }
+                    ids.add(index);
+                    int dec = node.getAsocAttr().getDomainSize();
+                    allCombinations = allCombinations * dec;
+                    decisions.put(index, dec);
+                }
+            }
+        }
+        decisionWeights.put(decisions.size()-1, 1);
+        for (int i = decisions.size() - 2; i >= 0; i--) {
+            decisionWeights.put(i, decisionWeights.get(i + 1) * decisions.get(i + 1));
+        }
+        HashMap<Integer,Integer> newDecisionWeights = new HashMap<>();
+        newDecisionWeights.put(decisions.size() - 1, 1);
+        for (int k = decisionWeights.size() - 2; k >= 0; k--) {
+            if (indexLogicalLevel >= k) {
+                if (k == decisionWeights.size() - 2) {
+                    newDecisionWeights.put(k, 1);
+                } else {
+                    newDecisionWeights.put(k, newDecisionWeights.get(k + 2) * decisions.get(k + 2));
+                }
+            } else {
+                newDecisionWeights.put(k, newDecisionWeights.get(k + 1) * decisions.get(k + 1));
+            }
+        }
+
+        MDD dpld = DPLD(diagram, componentIndex, stateFrom , stateTo);
+        int changes = getChanges(dpld, newDecisionWeights);
+        double relativeChanges = changes / ((double) allCombinations / indexDomainSize);
+        return relativeChanges;
     }
 
     private static int getChanges(MDD dpld, HashMap<Integer, Integer> decisionWeight) {
