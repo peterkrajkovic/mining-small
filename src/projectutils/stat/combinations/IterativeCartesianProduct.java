@@ -39,6 +39,13 @@ public class IterativeCartesianProduct implements Iterable<Object[]> {
         return combinations;
     }
 
+    public long getCombinationCount() {
+        long ret = 1;
+        for (TempContainer container : containers) {
+            ret *= container.items.length;
+        }
+        return ret;
+    }
     public void forEachCombination(Consumer<Object[]> consumer) {
         reset();
         do {

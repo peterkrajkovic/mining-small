@@ -10,6 +10,7 @@ import projectutils.ProjectUtils;
 import reliability.StructFunctionClassifier;
 import visualization.graphviz.script.GraphvizScript;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /*
@@ -60,6 +61,18 @@ public class MDDexample {
         for (int key : SItable.keySet()) {
             System.out.println(SItable.get(key) + " " + logicalIndexAttributes.get(key));
         }
+
+        StructFunctionClassifier stf = new StructFunctionClassifier(decisionDiagram, dataset);
+        System.out.println(stf.derivate(3,0,1));
+        System.out.println(stf.derivate(3,0,2));
+
+        System.out.println(Arrays.toString(stf.getVector()));
+
+
+        System.out.println(stf.derivate(3,0,1));
+        System.out.println(stf.derivate(3,0,2));
+        System.out.println(stf.derivate(3,1,2));
+
         double si01 = DPLDexamples.derivate(decisionDiagram, 3,0,1);
         double si02 = DPLDexamples.derivate(decisionDiagram, 3,0,2);
         double si03 = DPLDexamples.derivate(decisionDiagram, 3,1,2);

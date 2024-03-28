@@ -43,6 +43,38 @@ public class StructFunctionClassifier {
         instance = dataset.getInstance(0);
     }
 
+    public IterativeCartesianProduct getCombinationIterator() {
+        IterativeCartesianProduct product = new IterativeCartesianProduct();
+        for (Attribute attribute : inputAttrs) {
+            product.addContainer(ArrayUtils.makeIntegerSequence(0, attribute.getDomainSize() - 1));
+        }
+        return product;
+    }
+    public int[] getVector() {
+        IterativeCartesianProduct stat = getCombinationIterator();
+        int[] vector = new int[(int) stat.getCombinationCount()];
+        NewInstance instance = dataset.getInstance(0);
+        int i =0;
+        for (Object[] objects : stat) {
+            setInstance(objects, instance);
+            int newPerformance = ProjectUtils.getMaxValueIndex(cls.classify(instance));
+            vector[i++] = newPerformance;
+        }
+        return vector;
+    }
+
+    private void setInstance(Object[] combination, NewInstance instance) {
+        for (int i = 0; i < combination.length; i++) {
+            Object object = combination[i];
+            setValue(instance, i, (int) object);
+        }
+    }
+
+    private NewInstance getInstance(Object[] combination) {
+        setInstance(combination, instance);
+        return instance;
+    }
+
     /**
      *
      * @return percentual changes in output
@@ -121,15 +153,6 @@ public class StructFunctionClassifier {
         return product;
     }
 //    
-
-    private NewInstance getInstance(Object[] combination) {
-
-        for (int i = 0; i < combination.length; i++) {
-            Object object = combination[i];
-            setValue(instance, i, (int) object);
-        }
-        return instance;
-    }
 
     private void setValue(NewInstance instance, int i, int object) {
         if (inputAttrs.get(i).isFuzzy()) {
