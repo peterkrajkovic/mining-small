@@ -34,7 +34,8 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
     private List<MDDnode> leaves = new ArrayList<>();
     private int classCount;
     private int variableCount = 0;
-    private HashMap<Integer, String> logicalIndexAttributes;
+    private ArrayList<MDDnode> uniqueNodes = new ArrayList<>();
+    private int leafLogicalLevel = 0;
 
     public MDD() {
     }
@@ -43,21 +44,41 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
         this.root = root;
         findLeaves(root,0);
     }
-	
-	public HashMap<Integer, String> setLogicalLevels() {
-        logicalIndexAttributes = new HashMap<>();
+	public ArrayList<MDDnode> getUniqueNodes() {
+        return this.uniqueNodes;
+    }
+
+	public ArrayList<MDDnode> setLogicalLevels() {
+        uniqueNodes = new ArrayList<>();
         setLogicalLevelsStep(this.root, 0);
-        return logicalIndexAttributes;
+        return uniqueNodes;
     }
     private void setLogicalLevelsStep(MDDnode node, int level) {
         if (node.getLogicalLevel() <= level) {
             node.setLogicalLevel(level);
-            if (!logicalIndexAttributes.containsKey(level) && !node.isLeaf()) {
-                logicalIndexAttributes.put(level, node.getAsocAttr().getName());
+            if (node.getAsocAttr() != null) {
+                boolean updated = false;
+                for (MDDnode n : uniqueNodes) {
+                    if (n.getAsocAttr().getName().equals(node.getAsocAttr().getName()) && n.getLogicalLevel() == level) {
+                        updated = true;
+                        break;
+                    }
+                    if (n.getAsocAttr().getName().equals(node.getAsocAttr().getName()) && n.getLogicalLevel() != level) {
+                        n.setLogicalLevel(level);
+                        updated = true;
+                        break;
+                    }
+                }
+                if (!updated) {
+                    uniqueNodes.add(node);
+                }
+            }
+            if (node.isLeaf() && level < this.leafLogicalLevel) {
+                leafLogicalLevel = level;
             }
         }
         for (MDDnode child : node.getChildren()) {
-                setLogicalLevelsStep(child, level + 1);
+            setLogicalLevelsStep(child, level + 1);
         }
     }
 

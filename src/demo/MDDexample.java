@@ -10,9 +10,6 @@ import projectutils.ProjectUtils;
 import reliability.StructFunctionClassifier;
 import visualization.graphviz.script.GraphvizScript;
 
-import java.util.Arrays;
-import java.util.HashMap;
-
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -46,10 +43,10 @@ public class MDDexample {
         //--kod by mal byt ulozeny aj v clipboard (po zbehnuti kodu staci stlacit ctrl+v)
         
         //--vypocet indexov
-        HashMap<Integer, String> logicalIndexAttributes = decisionDiagram.setLogicalLevels();
+        decisionDiagram.setLogicalLevels();
         //code = GraphvizScript.code(decisionDiagram);
         //ProjectUtils.toClipboard(code);
-        //MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
+        MDD dl = DPLDexamples.DPLD(decisionDiagram, 1, 0, 1);
         //code = GraphvizScript.code(dl);
         //ProjectUtils.toClipboard(code);
         System.out.println("vypocet pomocou tabulky");
@@ -58,24 +55,33 @@ public class MDDexample {
         cls.printImportance();
         //System.out.println(cls.derivate(3, 0, 1));
         System.out.println("vypocet pomocou MDD");
-        for (int key : SItable.keySet()) {
-            System.out.println(SItable.get(key) + " " + logicalIndexAttributes.get(key));
+        for (String key : SItable.keySet()) {
+            System.out.println(SItable.get(key) + " " + key);
         }
 
         StructFunctionClassifier stf = new StructFunctionClassifier(decisionDiagram, dataset);
         System.out.println(stf.derivate(3,0,1));
-        System.out.println(stf.derivate(3,0,2));
+        //System.out.println(stf.derivate(3,0,2));
 
-        System.out.println(Arrays.toString(stf.getVector()));
+        //System.out.println(Arrays.toString(stf.getVector()));
 
-
-        System.out.println(stf.derivate(3,0,1));
-        System.out.println(stf.derivate(3,0,2));
-        System.out.println(stf.derivate(3,1,2));
+        System.out.println("vypocet pomocou tabulky");
+        System.out.println("index 2: 0->1, " + stf.derivate(2,0,1));
+        System.out.println("index 2: 0->2, " + stf.derivate(2,0,2));
+        System.out.println("index 2: 1->2, " + stf.derivate(2,1,2));
 
         double si01 = DPLDexamples.derivate(decisionDiagram, 3,0,1);
-        double si02 = DPLDexamples.derivate(decisionDiagram, 3,0,2);
-        double si03 = DPLDexamples.derivate(decisionDiagram, 3,1,2);
+        double si02 = DPLDexamples.derivate(decisionDiagram, 3,0,1);
+        double si03 = DPLDexamples.derivate(decisionDiagram, 3,1,0);
+
+        DPLDexamples dplDexamples = new DPLDexamples();
+        double si01S = dplDexamples.derivateUsingSatisfyCount(decisionDiagram, 3, 0,1);
+        double si02S = dplDexamples.derivateUsingSatisfyCount(decisionDiagram, 3, 0,1);
+        double si03S = dplDexamples.derivateUsingSatisfyCount(decisionDiagram, 3, 1,0);
+
+        System.out.println("vypocet pomocou satisfyCount");
+        System.out.println(si01S + " " + si02S + " " + si03S + " dokopy: " + (si01S + si02S + si03S));
+        System.out.println("vypocet pomocou custom algoritmu");
         System.out.println(si01 + " " + si02 + " " + si03 + " dokopy: " + (si01 + si02 + si03));
     }
     

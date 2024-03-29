@@ -6,8 +6,6 @@ package demo;
 import minig.classification.mdd.MDD;
 import minig.classification.mdd.MDDnode;
 import minig.data.core.attribute.Attribute;
-import projectutils.ProjectUtils;
-import visualization.graphviz.script.GraphvizScript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,11 +51,6 @@ public class DPLD {
         //cofactor computation
         MDD lhsCofactor = COFACTOR(mdd, index, from);
         MDD rhsCofactor = COFACTOR(mdd, index, to);
-        String code;
-        code = GraphvizScript.code(lhsCofactor);
-        ProjectUtils.toClipboard(code);
-        code = GraphvizScript.code(rhsCofactor);
-        ProjectUtils.toClipboard(code);
         if (lhsCofactor == null || rhsCofactor == null) {
             return null;
         }
@@ -154,7 +147,7 @@ public class DPLD {
     public MDDnode TRANSFORMSTEP(MDDnode node, Function<Integer, Integer> gamma) {
         if (node.isLeaf()) {
             int newOutput = gamma.apply((int) node.getOutputClass());
-            return CreateTerminalNode(node.getAsocAttr(), newOutput);
+            return CreateTerminalNode(node.getAsocAttr(), newOutput, node.getLogicalLevel());
         }
         // Check if the transform of the node has already been computed
         if (memo.containsKey(node)) {
@@ -197,7 +190,7 @@ public class DPLD {
         return node;
     }
 
-    public MDDnode CreateTerminalNode(Attribute a, int outputClass) {
+    public MDDnode CreateTerminalNode(Attribute a, int outputClass, int logicalLevel) {
         //check if terminal node already exists
         for (MDDnode k : this.terminals) {
             if ((int) k.getOutputClass() == outputClass) {
@@ -208,6 +201,7 @@ public class DPLD {
         MDDnode node = new MDDnode();
         node.setOutputClass(outputClass);
         node.setAsocAttr(a);
+        node.setLogicalLevel(logicalLevel);
         terminals.add(node);
         return node;
     }
@@ -228,7 +222,7 @@ public class DPLD {
         MDDnode node;
         if (left.isLeaf() && right.isLeaf()) {
             int outputClass = op.apply((int) left.getOutputClass(), (int) right.getOutputClass());
-            node = CreateTerminalNode(left.getAsocAttr(), outputClass);
+            node = CreateTerminalNode(left.getAsocAttr(), outputClass, left.getLogicalLevel());
 
         } else if (right.isLeaf()) {
             var leftChildren = left.getChildren();

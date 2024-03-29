@@ -4,7 +4,6 @@
  */
 package reliability;
 
-import java.util.List;
 import minig.classification.fdt.FDTu;
 import minig.classification.fdt.FuzzyDecisionTree;
 import minig.classification.mdd.MDD;
@@ -17,6 +16,8 @@ import projectutils.ArrayUtils;
 import projectutils.ProjectUtils;
 import projectutils.stat.combinations.IterativeCartesianProduct;
 import visualization.graphviz.script.GraphvizScript;
+
+import java.util.List;
 
 /**
  *
