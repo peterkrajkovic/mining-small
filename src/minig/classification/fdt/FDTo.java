@@ -20,6 +20,7 @@ public class FDTo extends FuzzyDecisionTree {
 
     private int leafCount = 0;
     private List<FuzzyAttr> freeAttr;
+    private List<FuzzyAttr> usedAttrs = new ArrayList<>();
     private FuzzyAttr outputAttr;
 
     public FDTo(double alpha, double beta, DataSet dataset) {
@@ -91,6 +92,9 @@ public class FDTo extends FuzzyDecisionTree {
                 nodes.clear();
             }
             freeAttr.remove(asocAttr);
+            if (asocAttr != null) {
+                usedAttrs.add(asocAttr);
+            }
             newLevel.clear();
             CreateNewNodes(newNodes, asocAttr, bestEntropies, newLevel);
         }
@@ -109,6 +113,10 @@ public class FDTo extends FuzzyDecisionTree {
                 }
             });
         }
+    }
+
+    public List<FuzzyAttr> getUsedAttrs() {
+        return usedAttrs;
     }
 
     private boolean isLeaf(FDTNode node) {

@@ -1,6 +1,7 @@
 package demo;
 
 
+import minig.classification.fdt.FDTo;
 import minig.classification.fdt.FDTu;
 import minig.classification.fdt.FuzzyDecisionTree;
 import minig.classification.mdd.MDD;
@@ -28,11 +29,13 @@ public class MDDexample {
         //dataset.print();
         dataset = dataset.toFuzzyDataset(3);
         //dataset.print();
-        
-      
-        FuzzyDecisionTree fdt = new FDTu(); //new FDTo();
+
+
+        FDTo fdt = new FDTo(); //new FDTo();
         fdt.setDataset(dataset);
         fdt.buildModel();
+
+        System.out.println("ordered attributes" + fdt.getUsedAttrs());
         //fdt.print();
         
         MDD decisionDiagram = new MDD(fdt);

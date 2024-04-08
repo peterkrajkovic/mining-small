@@ -59,7 +59,7 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
             if (node.getAsocAttr() != null) {
                 boolean updated = false;
                 for (MDDnode n : uniqueNodes) {
-                    if (n.getAsocAttr().getName().equals(node.getAsocAttr().getName()) && n.getLogicalLevel() == level) {
+                    if (n.getAsocAttr().getAttributeIndex() == node.getAsocAttr().getAttributeIndex() && n.getLogicalLevel() == level) {
                         updated = true;
                         break;
                     }
