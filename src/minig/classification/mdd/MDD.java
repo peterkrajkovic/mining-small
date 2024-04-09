@@ -48,11 +48,18 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
         return this.uniqueNodes;
     }
 
-	public ArrayList<MDDnode> setLogicalLevels() {
+    public void setRandomLogicalLevels() {
+        for (int i = 0; i < this.uniqueNodes.size(); i++) {
+            this.uniqueNodes.get(i).setLogicalLevel(i);
+        }
+    }
+
+	public void setLogicalLevels() {
         uniqueNodes = new ArrayList<>();
         setLogicalLevelsStep(this.root, 0);
-        return uniqueNodes;
+        repairLogicalLevels();
     }
+
     private void setLogicalLevelsStep(MDDnode node, int level) {
         if (node.getLogicalLevel() <= level) {
             node.setLogicalLevel(level);
@@ -63,7 +70,7 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
                         updated = true;
                         break;
                     }
-                    if (n.getAsocAttr().getName().equals(node.getAsocAttr().getName()) && n.getLogicalLevel() != level) {
+                    if (n.getAsocAttr().getAttributeIndex() == node.getAsocAttr().getAttributeIndex() && n.getLogicalLevel() != level) {
                         n.setLogicalLevel(level);
                         updated = true;
                         break;
@@ -73,7 +80,7 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
                     uniqueNodes.add(node);
                 }
             }
-            if (node.isLeaf() && level < this.leafLogicalLevel) {
+            if (node.isLeaf() && level > this.leafLogicalLevel) {
                 leafLogicalLevel = level;
             }
         }
@@ -81,6 +88,53 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
             setLogicalLevelsStep(child, level + 1);
         }
     }
+
+    private void repairLogicalLevels() {
+        boolean unique = false;
+        ArrayList<Integer> levels = new ArrayList<>();
+        while (!unique) {
+            unique = true;
+            levels = new ArrayList<>();
+            for (MDDnode node : this.uniqueNodes) {
+                int actualLevel = node.getLogicalLevel();
+                int actualAttributeIndex = node.getAsocAttr().getAttributeIndex();
+                if (levels.contains(actualLevel)) {
+                    unique = false;
+                    for (MDDnode n : uniqueNodes) {
+                        int nodeLevel = n.getLogicalLevel();
+                         if (nodeLevel > actualLevel || (nodeLevel == actualLevel && n.getAsocAttr().getAttributeIndex() != actualAttributeIndex)) {
+                             n.setLogicalLevel(nodeLevel + 1);
+                         }
+                    }
+                    break;
+                } else {
+                    levels.add(actualLevel);
+                }
+            }
+        }
+        for (int level : levels) {
+            if (leafLogicalLevel < level) {
+                leafLogicalLevel = level + 1;
+            }
+        }
+        forEachNode((node) -> {
+            if (node.isLeaf()) {
+                node.setLogicalLevel(leafLogicalLevel);
+            } else {
+                int level = 0;
+                int nodeAttIndex = node.getAsocAttr().getAttributeIndex();
+                for (MDDnode n : uniqueNodes) {
+                    if (n.getAsocAttr().getAttributeIndex() == nodeAttIndex) {
+                        level = n.getLogicalLevel();
+                        break;
+                    }
+                }
+                node.setLogicalLevel(level);
+            }
+        });
+    }
+
+
 
     @Override
     public List<Double> classify(Instance instance) {
@@ -157,8 +211,8 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
             leaf.setLevel(this.variableCount);
         }
 
-        //this.reduce();
-        this.reduceInak();
+        this.reduce();
+        //this.reduceInak();
     }
 
     @Override
