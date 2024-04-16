@@ -2,6 +2,8 @@ package demo;
 
 import minig.classification.mdd.MDD;
 import minig.classification.mdd.MDDnode;
+import projectutils.ProjectUtils;
+import visualization.graphviz.script.GraphvizScript;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +12,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 public class DPLDexamples {
+    //pomocné atribúty pre výpočty
     private HashMap<MDDnode, Integer> memo;
+    private ArrayList<MDDnode> uniqueNodes = new ArrayList<>();
 
     public static MDD IDPLDTYPEIII(MDD mdd, int index, int from, int to, int j) {
 
@@ -22,8 +26,8 @@ public class DPLDexamples {
         BinaryOperator<Integer> binaryAND = (x, y) -> x == 1 && y == 1 ? 1 : 0;
 
         //dpld computation
-        DPLD dpld  = new DPLD();
-        MDD result = dpld.UniversalIDPLD(mdd, index, from, to, lowerThanOne,atLeastOne, binaryAND);
+        DPLD dpld = new DPLD();
+        MDD result = dpld.UniversalIDPLD(mdd, index, from, to, lowerThanOne, atLeastOne, binaryAND);
 
         return result;
     }
@@ -38,7 +42,7 @@ public class DPLDexamples {
         BinaryOperator<Integer> binaryAND = (x, y) -> x == 1 && y == 1 ? 1 : 0;
 
         //dpld computation
-        DPLD dpld  = new DPLD();
+        DPLD dpld = new DPLD();
         MDD result = dpld.UniversalIDPLD(mdd, index, from, to, equalsJ, lowerThanJ, binaryAND);
 
         return result;
@@ -50,17 +54,17 @@ public class DPLDexamples {
         BinaryOperator<Integer> equals = (x, y) -> Objects.equals(x, y) ? 1 : 0;
 
         //dpld computation
-        DPLD dpld  = new DPLD();
+        DPLD dpld = new DPLD();
         MDD result = dpld.UniversalDPLD(mdd, index, from, to, equals);
 
         return result;
     }
 
 
-    public static HashMap<Integer, Double> SICalculation(MDD mdd) {
+    public static HashMap<String, Double> SICalculation(MDD mdd) {
         ArrayList<Integer> ids = new ArrayList<Integer>();
-        HashMap<Integer,Integer> decisions = new HashMap<Integer, Integer>();
-        HashMap<Integer,Integer> decisionWeights = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> decisions = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> decisionWeights = new HashMap<Integer, Integer>();
         HashMap<Integer, Integer> si = new HashMap<>();
         int allCombinations = 1;
         for (MDDnode node : mdd) {
@@ -74,7 +78,7 @@ public class DPLDexamples {
                 }
             }
         }
-        decisionWeights.put(decisions.size()-1, 1);
+        decisionWeights.put(decisions.size() - 1, 1);
         for (int i = decisions.size() - 2; i >= 0; i--) {
             decisionWeights.put(i, decisionWeights.get(i + 1) * decisions.get(i + 1));
         }
@@ -88,23 +92,23 @@ public class DPLDexamples {
                 if (!ids.contains(index)) {
                     ids.add(index);
                     int size = node.getAsocAttr().getDomainSize();
-                    HashMap<Integer,Integer> newDecisionWeights = new HashMap<>();
+                    HashMap<Integer, Integer> newDecisionWeights = new HashMap<>();
                     newDecisionWeights.put(decisions.size() - 1, 1);
                     for (int k = decisionWeights.size() - 2; k >= 0; k--) {
-                            if (node.getLogicalLevel() >= k) {
-                                    if (k == decisionWeights.size() - 2) {
-                                        newDecisionWeights.put(k, 1);
-                                    } else {
-                                        newDecisionWeights.put(k, newDecisionWeights.get(k + 2) * decisions.get(k + 2));
-                                    }
+                        if (node.getLogicalLevel() >= k) {
+                            if (k == decisionWeights.size() - 2) {
+                                newDecisionWeights.put(k, 1);
                             } else {
-                                newDecisionWeights.put(k, newDecisionWeights.get(k + 1) * decisions.get(k + 1));
+                                newDecisionWeights.put(k, newDecisionWeights.get(k + 2) * decisions.get(k + 2));
                             }
+                        } else {
+                            newDecisionWeights.put(k, newDecisionWeights.get(k + 1) * decisions.get(k + 1));
+                        }
                     }
 
                     for (int i = 0; i < size; i++) {
                         for (int j = i + 1; j < size; j++) {
-                            MDD dpld = DPLD(mdd, index, i , j);
+                            MDD dpld = DPLD(mdd, index, i, j);
                             //String code;
                             //code = GraphvizScript.code(dpld);
                             //ProjectUtils.toClipboard(code);
@@ -118,12 +122,76 @@ public class DPLDexamples {
 
             }
         }
-
-        HashMap <Integer, Double> updatedSI = new HashMap<Integer, Double>();
+        HashMap <String, Double> updatedSI = new HashMap<>();
         for (int key : si.keySet()) {
             //System.out.println("key: " + key + " all: "+ allCombinations + " decisions: " + decisions.get(key));
             double value = si.get(key) / ((double)allCombinations / decisions.get(key));
-            updatedSI.put(key, value);
+            String name = null;
+            for (MDDnode node : mdd.getUniqueNodes()) {
+                if (node.getLogicalLevel() == key) {
+                    name = node.getAsocAttr().getName();
+                    break;
+                }
+            }
+            updatedSI.put(name, value);
+        }
+        return updatedSI;
+    }
+
+    public  HashMap<String, Double> SICalculationUsingSatisfyCount(MDD mdd) {
+        ArrayList<Integer> ids = new ArrayList<Integer>();
+        HashMap<Integer, Integer> decisions = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> si = new HashMap<>();
+        int allCombinations = 1;
+        for (MDDnode node : mdd) {
+            if (node.getAsocAttr() != null) {
+                int index = node.getLogicalLevel();
+                if (!ids.contains(index)) {
+                    ids.add(index);
+                    int dec = node.getAsocAttr().getDomainSize();
+                    allCombinations = allCombinations * dec;
+                    decisions.put(index, dec);
+                }
+            }
+        }
+        ids = new ArrayList<>();
+
+        for (MDDnode node : mdd) {
+            if (node.getAsocAttr() != null) {
+                int index = node.getAsocAttr().getAttributeIndex();
+                int changes = 0;
+                int logicalLevel = node.getLogicalLevel();
+                if (!ids.contains(index)) {
+                    ids.add(index);
+                    int size = node.getAsocAttr().getDomainSize();
+
+                    for (int i = 0; i < size; i++) {
+                        for (int j = i + 1; j < size; j++) {
+                            MDD dpld = DPLD(mdd, index, i, j);
+                            String code = GraphvizScript.code(dpld);
+                            ProjectUtils.toClipboard(code);
+                            int newChanges = satisfyCount(dpld, index, mdd.getUniqueNodes(),0);
+                            changes += newChanges;
+                        }
+                    }
+                    si.put(logicalLevel, changes);
+                }
+
+            }
+        }
+
+        HashMap <String, Double> updatedSI = new HashMap<>();
+        for (int key : si.keySet()) {
+            //System.out.println("key: " + key + " all: "+ allCombinations + " decisions: " + decisions.get(key));
+            double value = si.get(key) / ((double)allCombinations / decisions.get(key));
+            String name = null;
+                for (MDDnode node : mdd.getUniqueNodes()) {
+                    if (node.getLogicalLevel() == key) {
+                        name = node.getAsocAttr().getName();
+                        break;
+                    }
+                }
+            updatedSI.put(name, value);
         }
         return updatedSI;
     }
@@ -188,15 +256,45 @@ public class DPLDexamples {
         return changes;
     }
 
-    public int satisfyCount(MDD diagram, int value) {
+    public double derivateUsingSatisfyCount(MDD diagram, int index, int from, int to) {
+        MDD derivated = DPLD(diagram,index,from,to);
+        String code = GraphvizScript.code(derivated);
+        ProjectUtils.toClipboard(code);
+        int changes = satisfyCount(derivated, index, diagram.getUniqueNodes(), 0);
+
+        int all = 0;
+        //computes whole domain
+        for (MDDnode node : diagram.getUniqueNodes()) {
+            if (node.getAsocAttr().getAttributeIndex() != index) {
+                 if (all == 0) {
+                     all = node.getAsocAttr().getDomainSize();
+                 } else {
+                     all *= node.getAsocAttr().getDomainSize();
+                 }
+            }
+        }
+        //System.out.println("index: " + index + " from: " + from + " to: " + to + "all: " + all + "changes: " + changes);
+        return (double)changes / all;
+    }
+
+    public int satisfyCount(MDD diagram, int index, ArrayList<MDDnode> uniqueNodes, int value) {
         var root = diagram.getRoot();
         memo = new HashMap<>();
         var iroot = root.getLevel();
-        var diff = domainProduct(1, iroot);
-        return diff * satisfyCountStep(root, value);
+        this.uniqueNodes = uniqueNodes;
+        int logicalLevel = 0;
+        for (MDDnode node : uniqueNodes){
+            if (node.getAsocAttr().getAttributeIndex() == index){
+                logicalLevel = node.getLogicalLevel();
+                break;
+            }
+        }
+        var diff = domainProduct(1, iroot, logicalLevel);
+
+        return diff * satisfyCountStep(root, logicalLevel, value);
     }
 
-    private int satisfyCountStep(MDDnode node, int value) {
+    private int satisfyCountStep(MDDnode node, int logicalLevel, int value) {
         if (node.isLeaf() && node.getOutputClass() == value) {
             return 1;
         }
@@ -207,24 +305,35 @@ public class DPLDexamples {
             return memo.get(node);
         }
         int count = 0;
-        int i = node.getLevel();
-        for (int k = 0; k < node.getChildren().size(); i++) {
+        int i = node.getLogicalLevel();
+        for (int k = 0; k < node.getChildren().size(); k++) {
             var son = node.getChildren().get(k);
-            var ison = son.getLevel();
-            var sonCount = satisfyCountStep(son, value);
-            int diff = domainProduct(i, ison);
-            count = diff * sonCount;
+                var ison = son.getLogicalLevel();
+                var sonCount = satisfyCountStep(son, logicalLevel, value);
+                int diff = domainProduct(i, ison, logicalLevel);
+                count += diff * sonCount;
         }
         memo.put(node, count);
         return count;
     }
 
-    private int domainProduct(int i1, int i2) {
+    private int domainProduct(int i1, int i2, int index) {
         int product = 1;
-        int i = i1;
-        while(i < i2) {
-            product = product * 1;
-            i++;
+        int i = i2-1;
+        while(i > i1) {
+            if (i == index) {
+                i--;
+                continue;
+            }
+            int level1DomainSize = 1;
+            for (MDDnode node : this.uniqueNodes) {
+                if (node.getLogicalLevel() == i) {
+                    level1DomainSize = node.getAsocAttr().getDomainSize();
+                    break;
+                }
+            }
+            product = product * level1DomainSize;
+            i--;
         }
         return product;
     }

@@ -4,13 +4,10 @@
  */
 package projectutils.stat.combinations;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.Consumer;
 import projectutils.StopWatch;
+
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  *
@@ -39,6 +36,13 @@ public class IterativeCartesianProduct implements Iterable<Object[]> {
         return combinations;
     }
 
+    public long getCombinationCount() {
+        long ret = 1;
+        for (TempContainer container : containers) {
+            ret *= container.items.length;
+        }
+        return ret;
+    }
     public void forEachCombination(Consumer<Object[]> consumer) {
         reset();
         do {
@@ -76,10 +80,18 @@ public class IterativeCartesianProduct implements Iterable<Object[]> {
     public Iterator<Object[]> iterator() {
         reset();
         return new Iterator<Object[]>() {
+            private boolean finish =  false;
 
             @Override
             public boolean hasNext() {
-                return tryShift();
+                if (finish) {
+                    return false;
+                }
+                if (tryShift() == false) {
+                    finish = true;
+                }
+                return true;
+
             }
 
             @Override
@@ -88,7 +100,6 @@ public class IterativeCartesianProduct implements Iterable<Object[]> {
             }
         };
     }
-
     class TempContainer {
 
         Object[] items;
