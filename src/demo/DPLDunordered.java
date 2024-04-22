@@ -25,7 +25,6 @@ public class DPLDunordered {
     private int satisfyCount = 0;
 
 
-
     public MDD UniversalDPLD(MDD mdd, int index, int from, int to, BinaryOperator<Integer> applyFunction) {
 
         //cofactor computation
@@ -124,7 +123,7 @@ public class DPLDunordered {
     public MDDnode TRANSFORMSTEP(MDDnode node, Function<Integer, Integer> gamma) {
         if (node.isLeaf()) {
             int newOutput = gamma.apply((int) node.getOutputClass());
-            return CreateTerminalNode(node.getAsocAttr(), newOutput, node.getLogicalLevel());
+            return CreateTerminalNode(node.getAsocAttr(), newOutput);
         }
         // Check if the transform of the node has already been computed
         if (memo.containsKey(node)) {
@@ -163,22 +162,21 @@ public class DPLDunordered {
         }
         node.setId(oldNode.getId());
         node.setAsocAttr(oldNode.getAsocAttr());
-        node.setLogicalLevel(oldNode.getLogicalLevel());
         return node;
     }
 
-    public MDDnode CreateTerminalNode(Attribute a, int outputClass, int logicalLevel) {
+    public MDDnode CreateTerminalNode(Attribute a, int outputClass) {
         //check if terminal node already exists
         for (MDDnode k : this.terminals) {
             if ((int) k.getOutputClass() == outputClass) {
                 return k;
             }
         }
+
         //create new node
         MDDnode node = new MDDnode();
         node.setOutputClass(outputClass);
         node.setAsocAttr(a);
-        node.setLogicalLevel(logicalLevel);
         terminals.add(node);
         return node;
     }
@@ -195,11 +193,11 @@ public class DPLDunordered {
         if (applyCache.containsKey(new Tuple(left, right))) {
             return applyCache.get(new Tuple(left, right));
         }
-        //TODO treba skraslit
+        //TODO not working
         MDDnode node;
         if (left.isLeaf() && right.isLeaf()) {
             int outputClass = op.apply((int) left.getOutputClass(), (int) right.getOutputClass());
-            node = CreateTerminalNode(left.getAsocAttr(), outputClass, left.getLogicalLevel());
+            node = CreateTerminalNode(left.getAsocAttr(), outputClass);
 
         } else if (right.isLeaf()) {
             var leftChildren = left.getChildren();
@@ -217,6 +215,7 @@ public class DPLDunordered {
             }
             node = CreateInternalNode(right, sons);
         } else {
+            //TODO problem part
             int ilhs = left.getLevel();
             int irhs = right.getLevel();
 
@@ -251,7 +250,7 @@ public class DPLDunordered {
     }
 
 
-    public  MDD DPLD(MDD mdd, int index, int from, int to) {
+    public MDD DPLD(MDD mdd, int index, int from, int to) {
 
         //apply function
         BinaryOperator<Integer> equals = (x, y) -> Objects.equals(x, y) ? 1 : 0;
@@ -263,10 +262,10 @@ public class DPLDunordered {
     }
 
     public double derivateUsingSatisfyCount(MDD diagram, int index, int from, int to) {
-        MDD derivated = DPLD(diagram,index,from,to);
+        MDD derivated = DPLD(diagram, index, from, to);
         String code = GraphvizScript.code(derivated);
         ProjectUtils.toClipboard(code);
-        int changes = satisfyCountTop(derivated, index,diagram.getUniqueNodes(), 0);
+        int changes = satisfyCountTop(derivated, index, diagram.getUniqueNodes(), 0);
 
         int all = 0;
         //computes whole domain
@@ -280,7 +279,7 @@ public class DPLDunordered {
             }
         }
         System.out.println("index: " + index + " from: " + from + " to: " + to + "all: " + all + "changes: " + changes);
-        return (double)changes / all;
+        return (double) changes / all;
     }
 
     public int satisfyCountTop(MDD diagram, int index, ArrayList<MDDnode> uniqueNodes, int value) {
@@ -288,8 +287,8 @@ public class DPLDunordered {
 
         //finds leaf representing changes, in this case with 0 as outputclass
         MDDnode leaf = null;
-        for (MDDnode node : diagram.getLeaves()){
-            if (node.getOutputClass() == value){
+        for (MDDnode node : diagram.getLeaves()) {
+            if (node.getOutputClass() == value) {
                 leaf = node;
                 break;
             }
@@ -297,7 +296,7 @@ public class DPLDunordered {
         int count = 0;
         satisfyCount = 0;
 
-        if (leaf != null){
+        if (leaf != null) {
             char[] bitRepre = new char[uniqueNodes.size()];
             int in = 0;
             for (MDDnode n : this.uniqueNodes) {
@@ -332,7 +331,7 @@ public class DPLDunordered {
         //is root, calculate changes
         if (node.getParents().size() == 0) {
             int count = 1;
-            for (int i = 0; i < newIndexes.length; i++){
+            for (int i = 0; i < newIndexes.length; i++) {
                 if (newIndexes[i] != '1') {
                     count *= uniqueNodes.get(i).getAsocAttr().getDomainSize();
                 }
@@ -347,69 +346,7 @@ public class DPLDunordered {
         }
     }
 
-//
-//    public int satisfyCount(MDD diagram, int index, ArrayList<MDDnode> uniqueNodes, int value) {
-//        var root = diagram.getRoot();
-//        memo = new HashMap<>();
-//        this.uniqueNodes = uniqueNodes;
-//
-//        char[] s  = new char[uniqueNodes.size()];
-//        for (int i = 0; i < uniqueNodes.size();i++) {
-//            if (uniqueNodes.get(i).getAsocAttr().getAttributeIndex() == index){
-//                s[i] = '1';
-//            } else {
-//                s[i] = '0';
-//            }
-//        }
-//
-//        return satisfyCountStep(root, s, value);
-//    }
-//
-//    private int satisfyCountStep(MDDnode node, char[] indexes, int value) {
-//        if (node.isLeaf() && node.getOutputClass() == value) {
-//            int count = 1;
-//            for (int i = 0; i < indexes.length; i++) {
-//                if (indexes[i] == '0') {
-//                    int domainSize = 1;
-//                    for (MDDnode n : this.uniqueNodes) {
-//                        if (n.getLogicalLevel() == i) {
-//                            domainSize = n.getAsocAttr().getDomainSize();
-//                        }
-//                    }
-//                    count *= domainSize;
-//                }
-//            }
-//            return count;
-//        }
-//
-//        if (node.isLeaf() && node.getOutputClass() != value) {
-//            return 0;
-//        }
-//
-//        if (satisfyMemo.containsKey(node)) {
-//            return satisfyMemo.get(node);
-//        }
-//
-//        int index = 0;
-//        for (MDDnode n : this.uniqueNodes) {
-//            if (n.getAsocAttr().getAttributeIndex() == node.getAsocAttr().getAttributeIndex()){
-//                break;
-//            }
-//            index++;
-//        }
-//        char[] newIndexes = Arrays.copyOf(indexes, indexes.length);;
-//        newIndexes[index] = '1';
-//
-//        int count = 0;
-//        for (int k = 0; k < node.getChildren().size(); k++) {
-//            var son = node.getChildren().get(k);
-//            var sonCount = satisfyCountStep(son, newIndexes, value);
-//            count += sonCount;
-//        }
-//
-//        satisfyMemo.put(node, count);
-//        return count;
-//    }
+
     public static class Tuple<T> {
         T x1;
         T x2;

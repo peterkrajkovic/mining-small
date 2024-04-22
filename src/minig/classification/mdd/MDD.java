@@ -5,6 +5,7 @@
  */
 package minig.classification.mdd;
 
+import minig.classification.fdt.FDTo;
 import minig.classification.fdt.FDTu;
 import minig.classification.fdt.FuzzyDecisionTree;
 import minig.classification.trees.ClassificationTree;
@@ -35,7 +36,7 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
     private int classCount;
     private int variableCount = 0;
     private ArrayList<MDDnode> uniqueNodes = new ArrayList<>();
-    private int leafLogicalLevel = 0;
+    private HashMap<Integer,Integer> logicalLevelMemo = new HashMap<>();
 
     public MDD() {
     }
@@ -44,8 +45,30 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
         this.root = root;
         findLeaves(root,0);
     }
+
+    public void setUniqueNodes() {
+        for (MDDnode node: this) {
+            if (node.getAsocAttr() != null) {
+                boolean alreadyIn = false;
+                for (MDDnode n : uniqueNodes) {
+                    if (n.getAsocAttr().getAttributeIndex() == node.getAsocAttr().getAttributeIndex()) {
+                        alreadyIn = true;
+                        break;
+                    }
+                }
+                if (!alreadyIn) {
+                    uniqueNodes.add(node);
+                }
+            }
+        }
+    }
+
 	public ArrayList<MDDnode> getUniqueNodes() {
         return this.uniqueNodes;
+    }
+
+    public HashMap<Integer, Integer> getLogicalLevelMemo() {
+        return this.logicalLevelMemo;
     }
 
     public void setRandomLogicalLevels() {
@@ -80,9 +103,6 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
                     uniqueNodes.add(node);
                 }
             }
-            if (node.isLeaf() && level > this.leafLogicalLevel) {
-                leafLogicalLevel = level;
-            }
         }
         for (MDDnode child : node.getChildren()) {
             setLogicalLevelsStep(child, level + 1);
@@ -112,15 +132,8 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
                 }
             }
         }
-        for (int level : levels) {
-            if (leafLogicalLevel < level) {
-                leafLogicalLevel = level + 1;
-            }
-        }
         forEachNode((node) -> {
-            if (node.isLeaf()) {
-                node.setLogicalLevel(leafLogicalLevel);
-            } else {
+            if (!node.isLeaf()) {
                 int level = 0;
                 int nodeAttIndex = node.getAsocAttr().getAttributeIndex();
                 for (MDDnode n : uniqueNodes) {
@@ -211,6 +224,12 @@ public class MDD extends Tree<MDDnode> implements ConsolePrintable, Classifier {
             leaf.setLevel(this.variableCount);
         }
 
+        if (tree instanceof FDTo){
+            var attributes = ((FDTo) tree).getUsedAttrs();
+            for (int i = 0; i < attributes.size(); i++) {
+                logicalLevelMemo.put(attributes.get(i).getAttributeIndex(), i);
+            }
+        }
         this.reduce();
         //this.reduceInak();
     }
