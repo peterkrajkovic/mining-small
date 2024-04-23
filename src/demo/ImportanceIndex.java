@@ -28,7 +28,7 @@ public class ImportanceIndex {
     /**
      * Calculates structural indexes of every component using diagram search
      * @param mdd MDD to be derivated
-     * @return table with level:index structure
+     * @return table with name:index structure
      */
     public  HashMap<String, Double> SICalculationUsingSatisfyCount(MDD mdd) {
         logicalLevelMemo = mdd.getLogicalLevelMemo();
@@ -92,7 +92,7 @@ public class ImportanceIndex {
     /**
      * Calculates structural indexes of every component using components domain sizes
      * @param mdd MDD to be derivated
-     * @return table with level:index structure
+     * @return table with name:index structure
      */
     public  HashMap<String, Double> SICalculation(MDD mdd) {
         logicalLevelMemo = mdd.getLogicalLevelMemo();
@@ -269,6 +269,7 @@ public class ImportanceIndex {
     public double derivateUsingSatisfyCount(MDD diagram, int index, int from, int to) {
         this.logicalLevelMemo = diagram.getLogicalLevelMemo();
 
+        //dpld
         DPLD derivatives = new DPLD();
         derivatives.setLogicalLevelMemo(this.logicalLevelMemo);
         MDD derivated = derivatives.standardDPLD(diagram,index,from,to);
@@ -292,7 +293,7 @@ public class ImportanceIndex {
 
     /**
      * Calculates structural index of component using diagram search method
-     * @param diagram
+     * @param diagram MDD
      * @param index index of component derivated
      * @param from component state
      * @param to component state
